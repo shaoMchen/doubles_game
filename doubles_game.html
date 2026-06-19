@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 DOUBLES 搭波斯羽球錦標賽 - 幸運扭蛋機</title>
+<style>
+  :root {
+    --paper: #F6F1E4;
+    --paper-deep: #ECE4D0;
+    --ink: #1F2A1D;
+    --ink-soft: #4A5644;
+    --brass: #B8862E;
+    --brass-deep: #8C641F;
+    --lacquer: #A33B2B;
+    --lacquer-deep: #7A2A1E;
+    --pine: #33503C;
+    --pine-deep: #20382A;
+    --line: rgba(31,42,29,0.16);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image: radial-gradient(circle at 1px 1px, rgba(31,42,29,0.05) 1px, transparent 0);
+    background-size: 14px 14px;
+  }
+
+  .stage {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ---------- Header ---------- */
+  .brandmark { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .brandmark .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--lacquer); }
+  .eyebrow { font-size: 12px; letter-spacing: 0.32em; color: var(--ink-soft); text-transform: uppercase; }
+
+  h1.title {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: clamp(28px, 5vw, 42px);
+    line-height: 1.2;
+    margin: 10px 0 6px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-align: center;
+  }
+  h1.title .accent { color: var(--lacquer); display: block; font-size: clamp(20px, 3.5vw, 26px); margin-top: 4px; font-weight: 500; }
+
+  .subtitle {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin: 0 0 36px;
+    max-width: 460px;
+  }
+
+  /* ---------- Shared panel shell ---------- */
+  .panel {
+    width: 100%;
+    background: #FFFDF8;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(31,42,29,0.04), 0 14px 36px -20px rgba(31,42,29,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Theme Image Background Layer */
+  .panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('image_2de6e3.jpg');
+    background-position: center;
+    background-size: cover;
+    opacity: 0.08; /* Subtle background watermark */
+    pointer-events: none;
+    z-index: 0;
+  }
+  .panel-content-wrapper {
+    position: relative;
+    z-index: 1; /* Make sure inputs/buttons stay on top of background */
+  }
+  .panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--pine), var(--brass) 50%, var(--lacquer));
+    z-index: 2;
+  }
+
+  /* ================= SETUP VIEW ================= */
+  #setup-view { width: 100%; }
+
+  .panel-head { padding: 26px 28px 18px; border-bottom: 1px dashed var(--line); }
+  .panel-head .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    color: var(--pine-deep);
+    background: rgba(51,80,60,0.08);
+    border: 1px solid rgba(51,80,60,0.22);
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .panel-head h2 { font-family: "Noto Serif TC", serif; font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .panel-head p { font-size: 13.5px; color: var(--ink-soft); margin: 0; }
+
+  .prize-rows { padding: 10px 28px 4px; display: flex; flex-direction: column; }
+
+  .prize-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 84px 36px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .prize-row:last-child { border-bottom: none; }
+
+  .prize-num {
+    font-family: "Noto Serif TC", serif;
+    font-size: 13px;
+    color: var(--brass-deep);
+    border: 1px solid var(--brass);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .field-label { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 4px; display: block; }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: rgba(246, 241, 228, 0.6);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: var(--pine);
+    background: #fff;
+  }
+  input[type="number"] { text-align: center; }
+  input::placeholder { color: rgba(31,42,29,0.35); }
+
+  .btn-delete {
+    background: transparent;
+    border: 1px solid rgba(163, 59, 43, 0.3);
+    color: var(--lacquer);
+    font-size: 14px;
+    border-radius: 8px;
+    height: 38px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-top: 18px;
+    transition: all 0.15s;
+  }
+  .btn-delete:hover {
+    background: var(--lacquer);
+    color: #fff;
+    border-color: var(--lacquer);
+  }
+
+  .setup-actions {
+    padding: 10px 28px 0;
+  }
+  .btn-add-item {
+    width: 100%;
+    background: transparent;
+    color: var(--pine);
+    border: 1px dashed var(--pine);
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-add-item:hover {
+    background: rgba(51, 80, 60, 0.06);
+  }
+
+  .panel-foot { padding: 22px 28px 28px; display: flex; flex-direction: column; gap: 10px; }
+
+  .btn {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 11px;
+    padding: 13px 18px;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.02em;
+    transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:active { transform: scale(0.985); }
+
+  .btn-primary { background: var(--lacquer); color: #FBF3E9; box-shadow: 0 8px 20px -8px rgba(122,42,30,0.55); }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:disabled { background: var(--ink-soft); opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+  .btn-success { background: var(--pine); color: #FBF3E9; box-shadow: 0 8px 20px -8px rgba(51,80,60,0.55); margin-top: 14px; width: 100%; max-width: 280px; position: relative; z-index: 10; }
+  .btn-success:hover { filter: brightness(1.08); }
+
+  .btn-ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-ghost:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+  .total-line { font-size: 12.5px; color: var(--ink-soft); text-align: center; }
+  .total-line b { color: var(--ink); }
+
+  /* ================= GACHA DRAW VIEW ================= */
+  #draw-view { width: 100%; display: none; }
+
+  .draw-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 26px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .draw-top .stamp { font-size: 11.5px; letter-spacing: 0.16em; color: var(--pine-deep); text-transform: uppercase; }
+  .draw-top .remain { font-size: 12.5px; color: var(--ink-soft); }
+  .draw-top .remain b { color: var(--lacquer); font-size: 15px; }
+
+  /* ---------- Gacha Machine ---------- */
+  .gacha-wrap { padding: 36px 28px 24px; display: flex; flex-direction: column; align-items: center; }
+  
+  .gacha-machine {
+    position: relative;
+    width: 220px;
+    height: 260px;
+    background: linear-gradient(180deg, var(--lacquer) 0%, var(--lacquer-deep) 100%);
+    border-radius: 24px 24px 16px 16px;
+    box-shadow: inset 0 -10px 20px rgba(0,0,0,0.2), 0 16px 32px -12px rgba(31,42,29,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .gacha-window {
+    width: 100%;
+    height: 100px;
+    background: rgba(255, 253, 248, 0.15);
+    border: 2px solid rgba(251,243,233,0.3);
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.15);
+  }
+  .gacha-window::before {
+    content: "● ● ● ● ●";
+    font-size: 24px;
+    color: rgba(251,243,233,0.35);
+    position: absolute;
+    bottom: 6px;
+    left: 0; right: 0;
+    text-align: center;
+    letter-spacing: 4px;
+  }
+
+  .gacha-crank-zone {
+    margin-top: 20px;
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+  .gacha-crank {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--brass) 0%, var(--brass-deep) 100%);
+    border-radius: 50%;
+    border: 3px solid #FFFDF8;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gacha-crank::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 14px;
+    background: #FFFDF8;
+    border-radius: 99px;
+  }
+  .gacha-machine.disabled .gacha-crank {
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+    opacity: 0.8;
+  }
+  
+  .gacha-crank.spinning { transform: rotate(360deg); }
+
+  .gacha-output {
+    position: absolute;
+    bottom: -12px;
+    width: 68px;
+    height: 44px;
+    background: #20382A;
+    border: 3px solid var(--brass);
+    border-radius: 12px;
+    box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
+  }
+
+  .gacha-capsule {
+    position: absolute;
+    top: -6px;
+    left: 11px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--lacquer) 50%, var(--paper-deep) 50%);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 -2px 5px rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: scale(0.5) translateY(-20px);
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  @keyframes capsule-drop {
+    0% { opacity: 0; transform: scale(0.5) translateY(-30px) rotate(0deg); }
+    40% { opacity: 1; transform: scale(1) translateY(0px) rotate(140deg); }
+    70% { transform: scale(1) translateY(-8px) rotate(220deg); }
+    100% { opacity: 1; transform: scale(1) translateY(0px) rotate(360deg); }
+  }
+  .gacha-capsule.dropped {
+    animation: capsule-drop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+  }
+
+  .box-hint {
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  /* ---------- Results ---------- */
+  .result-wrap { min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 28px; }
+  .result-card { text-align: center; display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
+  .result-card.show { display: block; opacity: 1; transform: translateY(0); }
+  .result-card .label { font-size: 11.5px; letter-spacing: 0.2em; color: var(--brass-deep); text-transform: uppercase; margin-bottom: 6px; }
+  .result-card .name { font-family: "Noto Serif TC", serif; font-size: 28px; font-weight: 700; color: var(--ink); }
+
+  .stock-wrap { padding: 4px 28px 26px; display: flex; flex-direction: column; gap: 8px; }
+  .stock-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(246, 241, 228, 0.6);
+    border: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .stock-row .name { color: var(--ink); }
+  .stock-row .qty { font-weight: 700; color: var(--pine-deep); font-size: 13px; }
+  .stock-row.empty { opacity: 0.45; }
+  .stock-row.empty .name { text-decoration: line-through; }
+
+  .draw-foot { padding: 4px 28px 28px; display: flex; gap: 10px; }
+  .draw-foot .btn { flex: 1; }
+
+  /* ---------- Log System ---------- */
+  .log-panel { margin-top: 18px; width: 100%; }
+  .log-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; cursor: pointer; }
+  .log-head .stamp { font-size: 11.5px; letter-spacing: 0.16em; color: var(--pine-deep); text-transform: uppercase; }
+  .log-panel.collapsed .chev { transform: rotate(-90deg); }
+  .log-body { padding: 0 22px 18px; display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+  .log-panel.collapsed .log-body { display: none; }
+  .log-row { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+  .log-row .seq { color: var(--ink-soft); width: 28px; }
+  .log-row .pname { flex: 1; }
+  .log-empty { font-size: 13px; color: var(--ink-soft); padding: 4px 0 12px; text-align: center; }
+
+  .confetti-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
+  .confetti-piece { position: absolute; top: -12px; width: 8px; height: 14px; opacity: 0.9; animation: confetti-fall linear forwards; }
+  @keyframes confetti-fall { to { transform: translateY(110vh) rotate(540deg); opacity: 0.3; } }
+
+  @media (max-width: 480px) {
+    .stage { padding: 36px 16px 60px; }
+    .prize-row { grid-template-columns: 24px 1fr 74px 32px; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="brandmark"><span class="pip"></span><span class="eyebrow">2026 DOUBLES</span></div>
+  <h1 class="title">搭波斯全國大專院校羽球錦標賽<span class="accent">幸運扭蛋抽獎</span></h1>
+  <p class="subtitle">歡迎來到大會抽獎現場！設定專屬獎品，轉動旋鈕試試手氣吧！</p>
+
+  <!-- ================= SETUP ================= -->
+  <div id="setup-view" class="panel">
+    <div class="panel-content-wrapper">
+      <div class="panel-head">
+        <span class="stamp">賽事準備</span>
+        <h2>配置扭蛋獎品</h2>
+        <p>可以自由增加或刪除項目，填入對應的獎品名稱與裝填數量。</p>
+      </div>
+
+      <!-- Dynamic Rows Container -->
+      <div class="prize-rows" id="prize-inputs"></div>
+
+      <div class="setup-actions">
+        <button type="button" class="btn-add-item" id="add-item-btn">➕ 新增獎品項目</button>
+      </div>
+
+      <div class="panel-foot">
+        <div class="total-line">目前總計 <b id="total-count">0</b> 顆扭蛋</div>
+        <button class="btn btn-primary" id="start-btn">封箱裝填，啟動扭蛋機</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DRAW ================= -->
+  <div id="draw-view" class="panel">
+    <div class="panel-content-wrapper">
+      <div class="draw-top">
+        <span class="stamp">抽獎進行中</span>
+        <span class="remain">機內剩餘 <b id="remain-count">0</b> 顆</span>
+      </div>
+
+      <div class="gacha-wrap">
+        <div class="gacha-machine" id="gacha-machine">
+          <div class="gacha-window"></div>
+          <div class="gacha-crank-zone">
+            <div class="gacha-crank" id="gacha-crank" role="button" tabindex="0"></div>
+          </div>
+          <div class="gacha-output">
+            <div class="gacha-capsule" id="gacha-capsule"></div>
+          </div>
+        </div>
+        <div class="box-hint" id="box-hint">請點擊或轉動黃銅旋鈕抽獎</div>
+      </div>
+
+      <div class="result-wrap">
+        <div class="result-card" id="result-card">
+          <div class="label">恭喜獲得獎項</div>
+          <div class="name" id="result-name">—</div>
+          <button class="btn btn-success" id="next-btn">收下獎品，換下一位</button>
+        </div>
+      </div>
+
+      <div class="stock-wrap" id="stock-list"></div>
+
+      <div class="draw-foot">
+        <button class="btn btn-ghost" id="reset-btn">重新設定獎品</button>
+        <button class="btn btn-ghost" id="clear-log-btn">清空紀錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOG ================= -->
+  <div class="panel log-panel" id="log-panel" style="display:none;">
+    <div class="panel-content-wrapper">
+      <div class="log-head" id="log-head">
+        <span class="stamp">大會得獎歷史</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="log-body" id="log-body">
+        <div class="log-empty">尚無中獎紀錄</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // Initial template data
+  var currentPrizes = [
+    { name: "特等獎：高級羽球拍", qty: 1 },
+    { name: "一等獎：專業羽球鞋", qty: 2 },
+    { name: "二等獎：運動防護毛巾", qty: 5 },
+    { name: "幸運獎：賽事紀念握把膠", qty: 10 }
+  ];
+  
+  var winnersLog = [];
+  var inputsDiv = document.getElementById("prize-inputs");
+
+  // Generate unique item row
+  function createRowHtml(index, name, qty) {
+    var row = document.createElement("div");
+    row.className = "prize-row";
+    row.id = "row-item-" + index;
+    row.innerHTML =
+      '<div class="prize-num">' + (index + 1) + '</div>' +
+      '<div>' +
+        '<label class="field-label">獎品內容</label>' +
+        '<input type="text" class="prize-name-input" value="' + name + '" placeholder="請輸入獎品名稱" />' +
+      '</div>' +
+      '<div>' +
+        '<label class="field-label">數量</label>' +
+        '<input type="number" class="prize-qty-input" value="' + qty + '" min="0" inputmode="numeric" />' +
+      '</div>' +
+      '<div>' +
+        '<button type="button" class="btn-delete" title="刪除此項目">🗑️</button>' +
+      '</div>';
+
+    // Bind event dynamic updates
+    row.querySelector(".prize-qty-input").addEventListener("input", updateTotal);
+    row.querySelector(".btn-delete").addEventListener("click", function() {
+      row.remove();
+      reindexRows();
+      updateTotal();
+    });
+
+    return row;
+  }
+
+  function reindexRows() {
+    var rows = inputsDiv.querySelectorAll(".prize-row");
+    rows.forEach(function(row, idx) {
+      row.querySelector(".prize-num").textContent = idx + 1;
+    });
+  }
+
+  function initSetupRows() {
+    inputsDiv.innerHTML = "";
+    currentPrizes.forEach(function(p, idx) {
+      inputsDiv.appendChild(createRowHtml(idx, p.name, p.qty));
+    });
+    updateTotal();
+  }
+
+  function updateTotal() {
+    var total = 0;
+    var qtyInputs = inputsDiv.querySelectorAll(".prize-qty-input");
+    qtyInputs.forEach(function(input) {
+      var v = parseInt(input.value, 10);
+      if (!isNaN(v) && v > 0) total += v;
+    });
+    document.getElementById("total-count").textContent = total;
+  }
+
+  // Add Item Click Event
+  document.getElementById("add-item-btn").addEventListener("click", function() {
+    var currentCount = inputsDiv.querySelectorAll(".prize-row").length;
+    var newRow = createRowHtml(currentCount, "", 1);
+    inputsDiv.appendChild(newRow);
+    newRow.querySelector(".prize-name-input").focus();
+    updateTotal();
+  });
+
+  function escapeHtml(s) {
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function renderStock() {
+    var wrap = document.getElementById("stock-list");
+    wrap.innerHTML = "";
+    var remain = 0;
+    currentPrizes.forEach(function (p) {
+      remain += p.qty;
+      var row = document.createElement("div");
+      row.className = "stock-row" + (p.qty <= 0 ? " empty" : "");
+      row.innerHTML =
+        '<span class="name">' + escapeHtml(p.name) + '</span>' +
+        '<span class="qty">' + (p.qty <= 0 ? "已抽完" : ("剩 " + p.qty)) + '</span>';
+      wrap.appendChild(row);
+    });
+    document.getElementById("remain-count").textContent = remain;
+    return remain;
+  }
+
+  function renderLog() {
+    var logPanel = document.getElementById("log-panel");
+    var body = document.getElementById("log-body");
+    if (winnersLog.length === 0) {
+      logPanel.style.display = "none";
+      return;
+    }
+    logPanel.style.display = "block";
+    body.innerHTML = "";
+    winnersLog.slice().reverse().forEach(function (entry, idx) {
+      var row = document.createElement("div");
+      row.className = "log-row";
+      row.innerHTML =
+        '<span class="seq">#' + (winnersLog.length - idx) + '</span>' +
+        '<span class="pname">' + escapeHtml(entry.name) + '</span>' +
+        '<span class="time">' + entry.time + '</span>';
+      body.appendChild(row);
+    });
+  }
+
+  document.getElementById("log-head").addEventListener("click", function () {
+    document.getElementById("log-panel").classList.toggle("collapsed");
+  });
+
+  // Start Gacha Game Button
+  document.getElementById("start-btn").addEventListener("click", function () {
+    var list = [];
+    var rows = inputsDiv.querySelectorAll(".prize-row");
+    
+    rows.forEach(function(row, idx) {
+      var name = row.querySelector(".prize-name-input").value.trim();
+      var qty = parseInt(row.querySelector(".prize-qty-input").value, 10);
+      if (isNaN(qty) || qty < 0) qty = 0;
+      if (!name) name = "未命名獎項 " + (idx + 1);
+      
+      if (qty > 0) {
+        list.push({ name: name, qty: qty });
+      }
+    });
+
+    if (list.length === 0) {
+      alert("請至少配置一個數量大於 0 的獎品項目！");
+      return;
+    }
+
+    currentPrizes = list;
+    winnersLog = [];
+    document.getElementById("setup-view").style.display = "none";
+    document.getElementById("draw-view").style.display = "block";
+    
+    resetMachineState();
+    renderStock();
+    renderLog();
+  });
+
+  function fireConfetti() {
+    var colors = ["#A33B2B", "#B8862E", "#33503C", "#ECE4D0"];
+    var layer = document.createElement("div");
+    layer.className = "confetti-layer";
+    document.body.appendChild(layer);
+    for (var i = 0; i < 28; i++) {
+      var p = document.createElement("div");
+      p.className = "confetti-piece";
+      p.style.left = (Math.random() * 100) + "vw";
+      p.style.background = colors[i % colors.length];
+      p.style.animationDuration = (1.4 + Math.random() * 1.2) + "s";
+      p.style.animationDelay = (Math.random() * 0.2) + "s";
+      layer.appendChild(p);
+    }
+    setTimeout(function () { layer.remove(); }, 3000);
+  }
+
+  var drawing = false;
+  var hasResultActive = false;
+
+  function doDraw() {
+    if (drawing || hasResultActive) return;
+    
+    var available = currentPrizes.filter(function (p) { return p.qty > 0; });
+    var machine = document.getElementById("gacha-machine");
+    var crank = document.getElementById("gacha-crank");
+    var capsule = document.getElementById("gacha-capsule");
+    var resultCard = document.getElementById("result-card");
+    var resultName = document.getElementById("result-name");
+    var hint = document.getElementById("box-hint");
+
+    if (available.length === 0) {
+      machine.classList.add("disabled");
+      hint.textContent = "所有獎品已全數抽完囉！";
+      return;
+    }
+
+    drawing = true;
+    hint.textContent = "轉動中... 看看抽到什麼好禮...";
+    crank.classList.add("spinning");
+
+    var pool = [];
+    available.forEach(function (p) {
+      for (var i = 0; i < p.qty; i++) pool.push(p);
+    });
+    var winner = pool[Math.floor(Math.random() * pool.length)];
+
+    setTimeout(function () {
+      capsule.classList.add("dropped");
+    }, 400);
+
+    setTimeout(function () {
+      winner.qty -= 1;
+      resultName.textContent = winner.name;
+      
+      resultCard.classList.add("show");
+      machine.classList.add("disabled");
+      fireConfetti();
+
+      var now = new Date();
+      var hh = String(now.getHours()).padStart(2, "0");
+      var mm = String(now.getMinutes()).padStart(2, "0");
+      winnersLog.push({ name: winner.name, time: hh + ":" + mm });
+      renderLog();
+
+      var remain = renderStock();
+      if (remain <= 0) {
+        hint.textContent = "全數抽完！感謝大家參與大專羽球錦標賽抽獎！";
+      } else {
+        hint.textContent = "恭喜獲獎！請按下方按鈕換下一位。";
+      }
+      
+      drawing = false;
+      hasResultActive = true; 
+    }, 1000);
+  }
+
+  function resetMachineState() {
+    var machine = document.getElementById("gacha-machine");
+    var crank = document.getElementById("gacha-crank");
+    var capsule = document.getElementById("gacha-capsule");
+    var resultCard = document.getElementById("result-card");
+    var hint = document.getElementById("box-hint");
+
+    var remain = currentPrizes.reduce(function (sum, p) { return sum + p.qty; }, 0);
+
+    crank.classList.remove("spinning");
+    capsule.classList.remove("dropped");
+    resultCard.classList.remove("show");
+    hasResultActive = false;
+
+    if (remain <= 0) {
+      machine.classList.add("disabled");
+      hint.textContent = "所有獎品已全數抽完囉！";
+    } else {
+      machine.classList.remove("disabled");
+      hint.textContent = "請點擊或轉動黃銅旋鈕抽獎";
+    }
+  }
+
+  var gachaCrank = document.getElementById("gacha-crank");
+  gachaCrank.addEventListener("click", doDraw);
+  gachaCrank.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      doDraw();
+    }
+  });
+
+  document.getElementById("next-btn").addEventListener("click", resetMachineState);
+
+  document.getElementById("reset-btn").addEventListener("click", function () {
+    document.getElementById("setup-view").style.display = "block";
+    document.getElementById("draw-view").style.display = "none";
+    initSetupRows();
+  });
+
+  document.getElementById("clear-log-btn").addEventListener("click", function () {
+    if (winnersLog.length === 0) return;
+    if (confirm("確定要清空本次大會的所有中獎紀錄嗎？")) {
+      winnersLog = [];
+      renderLog();
+    }
+  });
+
+  // Initial Execution
+  initSetupRows();
+})();
+</script>
+
+</body>
+</html>
